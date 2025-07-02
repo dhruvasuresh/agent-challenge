@@ -1,0 +1,8 @@
+{
+  "totalTransactionsAnalyzed": 1,
+  "totalMEVRisksDetected": 1,
+  "totalAlertsSent": 1,
+  "recentAlerts": [
+    "ALERT: MEV risk detected for tx from 0x1234567890abcdef1234567890abcdef12345678 to 0x1234567890abcdef1234567890abcdef12345678, value 10000000000000000000, gasPrice 200000000000. Reason: High gas price: 200000000000 wei"
+  ]
+}

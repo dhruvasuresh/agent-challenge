@@ -1,5 +1,23 @@
 import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
+import { notificationTool } from "../notification-agent/notification-tool";
+import { RuntimeContext } from "@mastra/core/runtime-context";
+import { incrementTransactionsAnalyzed, incrementMEVRisksDetected, incrementAlertsSent, getMetrics } from "../../metrics";
+
+// Minimal mock runtime context for tool execution
+const mockRuntimeContext = {
+  registry: {},
+  set: () => {},
+  get: () => undefined,
+  has: () => false,
+  delete: () => {},
+  keys: () => [],
+  values: () => [],
+  entries: () => [],
+  clear: () => {},
+  forEach: () => {},
+  size: 0,
+};
 
 // Detection logic (same as before)
 const KNOWN_MEV_BOTS = [
@@ -14,6 +32,10 @@ const KNOWN_DEX_ROUTERS = [
 const GWEI = 1_000_000_000n;
 const SUSPICIOUS_GAS_PRICE = 100n * GWEI;
 const LARGE_VALUE_WEI = 10n * 1_000_000_000_000_000_000n; // 10 ETH
+
+function parseWeiString(str: string): bigint {
+  return BigInt(str.replace(/\s*wei$/i, '').trim());
+}
 
 export const protectionTool = createTool({
   id: "protect-transaction",
@@ -32,12 +54,13 @@ export const protectionTool = createTool({
     action: z.string(),
   }),
   execute: async ({ context }) => {
+    incrementTransactionsAnalyzed();
     let mevRisk = false;
     let reasons: string[] = [];
     const from = context.from.toLowerCase();
     const to = context.to.toLowerCase();
-    const gasPrice = BigInt(context.gasPrice);
-    const value = BigInt(context.value);
+    const gasPrice = parseWeiString(context.gasPrice);
+    const value = parseWeiString(context.value);
     if (gasPrice > SUSPICIOUS_GAS_PRICE) {
       mevRisk = true;
       reasons.push(`High gas price: ${gasPrice} wei`);
@@ -56,7 +79,15 @@ export const protectionTool = createTool({
     }
     let action = "Sent directly to Ethereum mempool (no protection needed)";
     if (mevRisk) {
+      incrementMEVRisksDetected();
       action = "Simulated: Routed through Flashbots Protect for MEV protection";
+      // Send alert
+      const alertMsg = `ALERT: MEV risk detected for tx from ${from} to ${to}, value ${value}, gasPrice ${gasPrice}. Reason: ${reasons.join("; ")}`;
+      await notificationTool.execute({
+        context: { message: alertMsg },
+        runtimeContext: new RuntimeContext()
+      });
+      incrementAlertsSent(alertMsg);
     }
     return {
       status: mevRisk ? "MEV risk detected" : "No MEV risk detected",
@@ -64,5 +95,20 @@ export const protectionTool = createTool({
       reason: reasons.join("; "),
       action,
     };
+  },
+});
+
+export const metricsTool = createTool({
+  id: "get-metrics",
+  description: "Get current MEV protection suite metrics (transactions analyzed, MEV risks, alerts, recent alerts).",
+  inputSchema: z.object({}),
+  outputSchema: z.object({
+    totalTransactionsAnalyzed: z.number(),
+    totalMEVRisksDetected: z.number(),
+    totalAlertsSent: z.number(),
+    recentAlerts: z.array(z.string()),
+  }),
+  execute: async () => {
+    return getMetrics();
   },
 }); 

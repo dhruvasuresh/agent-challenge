@@ -1,6 +1,6 @@
 import { Agent } from "@mastra/core/agent";
 import { model } from "../../config";
-import { protectionTool } from "./protection-tool";
+import { protectionTool, metricsTool } from "./protection-tool";
 
 const name = "Protection Agent";
 const instructions = `
@@ -18,11 +18,13 @@ If any required parameter is missing, ask the user for it before proceeding.
 Once all parameters are available, call the protectionTool with these parameters and return the tool's output directly.
 
 Accept both natural language and JSON input from the user. Always be precise and never guess missing values.
+
+If a user asks for metrics, statistics, or the current status of the protection system, call the metricsTool and return its output directly.
 `;
 
 export const protectionAgent = new Agent({
   name,
   instructions,
   model,
-  tools: { protectionTool },
+  tools: { protectionTool, metricsTool },
 }); 
