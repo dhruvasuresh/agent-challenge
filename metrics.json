@@ -4,5 +4,65 @@
   "totalAlertsSent": 1,
   "recentAlerts": [
     "ALERT: MEV risk detected for tx from 0x1234567890abcdef1234567890abcdef12345678 to 0x1234567890abcdef1234567890abcdef12345678, value 10000000000000000000, gasPrice 200000000000. Reason: High gas price: 200000000000 wei"
-  ]
+  ],
+  "sandwichAttacksDetected": 0,
+  "frontrunAttacksDetected": 0,
+  "backrunAttacksDetected": 0,
+  "userMetrics": {
+    "ea1cd5fd-86ca-4698-8642-f2e659b5942d": {
+      "totalTransactionsAnalyzed": 0,
+      "totalMEVRisksDetected": 2,
+      "totalAlertsSent": 17,
+      "recentAlerts": [
+        "ALERT: Simulated suspicious tx for user user2 to 0x5c69bee701ef814a2b6a3edd4b1652cb9cc5aa6f. Reason: Possible frontrun: similar tx with higher gas price (20000000000) just before this one; Possible backrun: similar tx just after this one",
+        "ALERT: Simulated suspicious tx for user user2 to 0x5c69bee701ef814a2b6a3edd4b1652cb9cc5aa6f. Reason: Possible sandwich attack pattern: same address sent txs to 0x5c69bee701ef814a2b6a3edd4b1652cb9cc5aa6f before and after this tx; Possible frontrun: similar tx with higher gas price (20000000000) just before this one; Possible backrun: similar tx just after this one",
+        "ALERT: Simulated suspicious tx for user user2 to 0x5c69bee701ef814a2b6a3edd4b1652cb9cc5aa6f. Reason: Possible frontrun: similar tx with higher gas price (20000000000) just before this one; Possible backrun: similar tx just after this one",
+        "ALERT: Simulated suspicious tx for user user2 to 0x3560d3d26104ae0544baaf4de2dd1f2bfb19eeac. Reason: Known MEV bot address involved: 0x000000000000ad05ccc4f10045630fb830b95127 or 0x3560d3d26104ae0544baaf4de2dd1f2bfb19eeac",
+        "ALERT: Simulated suspicious tx for user user2 to 0x3560d3d26104ae0544baaf4de2dd1f2bfb19eeac. Reason: Large value transfer: 50 ETH",
+        "ALERT: Simulated suspicious tx for user user2 to 0x5c69bee701ef814a2b6a3edd4b1652cb9cc5aa6f. Reason: Possible frontrun: similar tx with higher gas price (20000000000) just before this one; Possible backrun: similar tx just after this one",
+        "ALERT: Simulated suspicious tx for user user2 to 0x5c69bee701ef814a2b6a3edd4b1652cb9cc5aa6f. Reason: Possible sandwich attack pattern: same address sent txs to 0x5c69bee701ef814a2b6a3edd4b1652cb9cc5aa6f before and after this tx; Possible frontrun: similar tx with higher gas price (20000000000) just before this one; Possible backrun: similar tx just after this one",
+        "ALERT: Simulated suspicious tx for user user2 to 0x5c69bee701ef814a2b6a3edd4b1652cb9cc5aa6f. Reason: Possible frontrun: similar tx with higher gas price (20000000000) just before this one; Possible backrun: similar tx just after this one",
+        "ALERT: Simulated suspicious tx for user user2 to 0x3560d3d26104ae0544baaf4de2dd1f2bfb19eeac. Reason: Known MEV bot address involved: 0x000000000000ad05ccc4f10045630fb830b95127 or 0x3560d3d26104ae0544baaf4de2dd1f2bfb19eeac",
+        "ALERT: Simulated suspicious tx for user user2 to 0x3560d3d26104ae0544baaf4de2dd1f2bfb19eeac. Reason: Large value transfer: 50 ETH"
+      ],
+      "sandwichAttacksDetected": 2,
+      "frontrunAttacksDetected": 6,
+      "backrunAttacksDetected": 6
+    },
+    "global": {
+      "totalTransactionsAnalyzed": 9,
+      "totalMEVRisksDetected": 9,
+      "totalAlertsSent": 24,
+      "recentAlerts": [
+        "ALERT: Simulated suspicious tx for user user3 to 0x5c69bee701ef814a2b6a3edd4b1652cb9cc5aa6f. Reason: Possible frontrun: similar tx with higher gas price (20000000000) just before this one; Possible backrun: similar tx just after this one",
+        "ALERT: Simulated suspicious tx for user user3 to 0x5c69bee701ef814a2b6a3edd4b1652cb9cc5aa6f. Reason: Possible sandwich attack pattern: same address sent txs to 0x5c69bee701ef814a2b6a3edd4b1652cb9cc5aa6f before and after this tx; Possible frontrun: similar tx with higher gas price (20000000000) just before this one; Possible backrun: similar tx just after this one",
+        "ALERT: Simulated suspicious tx for user user3 to 0x5c69bee701ef814a2b6a3edd4b1652cb9cc5aa6f. Reason: Possible frontrun: similar tx with higher gas price (20000000000) just before this one; Possible backrun: similar tx just after this one",
+        "ALERT: Simulated suspicious tx for user user3 to 0xa1bb3d0e6d742a09fdb4cacb51e76f91891ead5f. Reason: Known MEV bot address involved: 0x000000000000ad05ccc4f10045630fb830b95127 or 0xa1bb3d0e6d742a09fdb4cacb51e76f91891ead5f",
+        "ALERT: Simulated suspicious tx for user user3 to 0xa1bb3d0e6d742a09fdb4cacb51e76f91891ead5f. Reason: Large value transfer: 50.0 ETH",
+        "ALERT: Simulated suspicious tx for user user2 to 0x5c69bee701ef814a2b6a3edd4b1652cb9cc5aa6f. Reason: Possible frontrun: similar tx with higher gas price (20000000000) just before this one; Possible backrun: similar tx just after this one",
+        "ALERT: Simulated suspicious tx for user user2 to 0x5c69bee701ef814a2b6a3edd4b1652cb9cc5aa6f. Reason: Possible sandwich attack pattern: same address sent txs to 0x5c69bee701ef814a2b6a3edd4b1652cb9cc5aa6f before and after this tx; Possible frontrun: similar tx with higher gas price (20000000000) just before this one; Possible backrun: similar tx just after this one",
+        "ALERT: Simulated suspicious tx for user user2 to 0x5c69bee701ef814a2b6a3edd4b1652cb9cc5aa6f. Reason: Possible frontrun: similar tx with higher gas price (20000000000) just before this one; Possible backrun: similar tx just after this one",
+        "ALERT: Simulated suspicious tx for user user2 to 0x3560d3d26104ae0544baaf4de2dd1f2bfb19eeac. Reason: Known MEV bot address involved: 0x000000000000ad05ccc4f10045630fb830b95127 or 0x3560d3d26104ae0544baaf4de2dd1f2bfb19eeac",
+        "ALERT: Simulated suspicious tx for user user2 to 0x3560d3d26104ae0544baaf4de2dd1f2bfb19eeac. Reason: Large value transfer: 50 ETH"
+      ],
+      "sandwichAttacksDetected": 3,
+      "frontrunAttacksDetected": 9,
+      "backrunAttacksDetected": 9
+    },
+    "2c2cb2a7-f96c-469f-8a4d-ca154b9310de": {
+      "totalTransactionsAnalyzed": 5,
+      "totalMEVRisksDetected": 5,
+      "totalAlertsSent": 5,
+      "recentAlerts": [
+        "ALERT: Simulated suspicious tx for user user3 to 0x5c69bee701ef814a2b6a3edd4b1652cb9cc5aa6f. Reason: Possible frontrun: similar tx with higher gas price (20000000000) just before this one; Possible backrun: similar tx just after this one",
+        "ALERT: Simulated suspicious tx for user user3 to 0x5c69bee701ef814a2b6a3edd4b1652cb9cc5aa6f. Reason: Possible sandwich attack pattern: same address sent txs to 0x5c69bee701ef814a2b6a3edd4b1652cb9cc5aa6f before and after this tx; Possible frontrun: similar tx with higher gas price (20000000000) just before this one; Possible backrun: similar tx just after this one",
+        "ALERT: Simulated suspicious tx for user user3 to 0x5c69bee701ef814a2b6a3edd4b1652cb9cc5aa6f. Reason: Possible frontrun: similar tx with higher gas price (20000000000) just before this one; Possible backrun: similar tx just after this one",
+        "ALERT: Simulated suspicious tx for user user3 to 0xa1bb3d0e6d742a09fdb4cacb51e76f91891ead5f. Reason: Known MEV bot address involved: 0x000000000000ad05ccc4f10045630fb830b95127 or 0xa1bb3d0e6d742a09fdb4cacb51e76f91891ead5f",
+        "ALERT: Simulated suspicious tx for user user3 to 0xa1bb3d0e6d742a09fdb4cacb51e76f91891ead5f. Reason: Large value transfer: 50.0 ETH"
+      ],
+      "sandwichAttacksDetected": 1,
+      "frontrunAttacksDetected": 3,
+      "backrunAttacksDetected": 3
+    }
+  }
 }

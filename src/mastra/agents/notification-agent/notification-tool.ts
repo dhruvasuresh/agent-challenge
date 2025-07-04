@@ -8,15 +8,16 @@ export const notificationTool = createTool({
   description: "Send a real-time alert (Discord webhook + console log).",
   inputSchema: z.object({
     message: z.string().describe("Alert message to send"),
+    webhookUrl: z.string().optional().describe("Override Discord webhook URL")
   }),
   outputSchema: z.object({
     status: z.string(),
   }),
   execute: async ({ context }) => {
     const message = context.message;
+    const webhookUrl = context.webhookUrl || process.env.DISCORD_WEBHOOK_URL || DEFAULT_DISCORD_WEBHOOK_URL;
     console.log(`[ALERT] ${message}`);
     let discordStatus = "";
-    const webhookUrl = process.env.DISCORD_WEBHOOK_URL || DEFAULT_DISCORD_WEBHOOK_URL;
     try {
       const res = await fetch(webhookUrl, {
         method: "POST",

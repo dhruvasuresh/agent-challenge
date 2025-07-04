@@ -2,7 +2,7 @@ import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
 import { notificationTool } from "../notification-agent/notification-tool";
 import { RuntimeContext } from "@mastra/core/runtime-context";
-import { incrementTransactionsAnalyzed, incrementMEVRisksDetected, incrementAlertsSent, getMetrics } from "../../metrics";
+import { incrementUserMetric, getMetrics } from "../../metrics";
 
 // Minimal mock runtime context for tool execution
 const mockRuntimeContext = {
@@ -54,7 +54,7 @@ export const protectionTool = createTool({
     action: z.string(),
   }),
   execute: async ({ context }) => {
-    incrementTransactionsAnalyzed();
+    await incrementUserMetric("global", "totalTransactionsAnalyzed");
     let mevRisk = false;
     let reasons: string[] = [];
     const from = context.from.toLowerCase();
@@ -79,7 +79,7 @@ export const protectionTool = createTool({
     }
     let action = "Sent directly to Ethereum mempool (no protection needed)";
     if (mevRisk) {
-      incrementMEVRisksDetected();
+      await incrementUserMetric("global", "totalMEVRisksDetected");
       action = "Simulated: Routed through Flashbots Protect for MEV protection";
       // Send alert
       const alertMsg = `ALERT: MEV risk detected for tx from ${from} to ${to}, value ${value}, gasPrice ${gasPrice}. Reason: ${reasons.join("; ")}`;
@@ -87,7 +87,7 @@ export const protectionTool = createTool({
         context: { message: alertMsg },
         runtimeContext: new RuntimeContext()
       });
-      incrementAlertsSent(alertMsg);
+      await incrementUserMetric("global", "totalAlertsSent", alertMsg);
     }
     return {
       status: mevRisk ? "MEV risk detected" : "No MEV risk detected",

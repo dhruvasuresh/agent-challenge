@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>MEV Protection Suite Metrics Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <style>
     body { font-family: Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 0; }
     .container { max-width: 600px; margin: 40px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0001; padding: 32px; }
@@ -20,6 +21,34 @@
 <body>
   <div class="container">
     <h1>MEV Protection Suite Metrics</h1>
+    <div id="registerBox" style="margin-bottom: 16px; text-align: center; display: none;">
+      <input type="text" id="registerUsername" placeholder="Username" style="padding: 6px; width: 120px;">
+      <input type="password" id="registerPassword" placeholder="Password" style="padding: 6px; width: 120px;">
+      <button onclick="register()" style="padding: 6px 12px;">Register</button>
+      <span id="registerError" style="color: #b30000; margin-left: 12px;"></span>
+    </div>
+    <div id="loginBox" style="margin-bottom: 16px; text-align: center;">
+      <input type="text" id="loginUsername" placeholder="Username" style="padding: 6px; width: 120px;">
+      <input type="password" id="loginPassword" placeholder="Password" style="padding: 6px; width: 120px;">
+      <button onclick="login()" style="padding: 6px 12px;">Login</button>
+      <button onclick="showRegister()" style="padding: 6px 12px; margin-left: 8px;">Register</button>
+      <span id="loginError" style="color: #b30000; margin-left: 12px;"></span>
+    </div>
+    <div id="userBox" style="margin-bottom: 16px; text-align: center; display: none;">
+      <span id="currentUser" style="color: #555;"></span>
+      <button onclick="logout()" style="padding: 6px 12px; margin-left: 12px;">Logout</button>
+    </div>
+    <div id="walletBox" style="margin-bottom: 24px; text-align: center; display: none;">
+      <h3>Your Wallets</h3>
+      <ul id="walletList" style="list-style: none; padding: 0; margin-bottom: 12px;"></ul>
+      <input type="text" id="addWalletInput" placeholder="Add wallet address" style="padding: 6px; width: 220px;">
+      <button onclick="addWallet()" style="padding: 6px 12px;">Add Wallet</button>
+      <span id="walletError" style="color: #b30000; margin-left: 12px;"></span>
+    </div>
+    <div id="walletConnectBox" style="margin-bottom: 16px; text-align: center;">
+      <button onclick="connectWallet()" style="padding: 6px 12px;">Connect MetaMask</button>
+      <span id="connectedWallet" style="margin-left: 12px; color: #0077cc;"></span>
+    </div>
     <div class="metrics">
       <div class="metric">
         <h2>Transactions</h2>
@@ -34,27 +63,222 @@
         <span id="alertCount">0</span>
       </div>
     </div>
+    <div class="metrics">
+      <div class="metric">
+        <h2>Sandwich Attacks</h2>
+        <span id="sandwichCount">0</span>
+      </div>
+      <div class="metric">
+        <h2>Frontruns</h2>
+        <span id="frontrunCount">0</span>
+      </div>
+      <div class="metric">
+        <h2>Backruns</h2>
+        <span id="backrunCount">0</span>
+      </div>
+    </div>
     <div class="alerts">
       <h3>Recent Alerts</h3>
       <ul class="alert-list" id="alertList"></ul>
     </div>
   </div>
   <script>
-    async function fetchMetrics() {
-      const res = await fetch('http://localhost:8090/api/metrics');
+    let connectedWalletAddress = "";
+
+    async function register() {
+      const username = document.getElementById('registerUsername').value.trim();
+      const password = document.getElementById('registerPassword').value;
+      const res = await fetch('http://localhost:8090/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
       const data = await res.json();
-      document.getElementById('txCount').textContent = data.totalTransactionsAnalyzed;
-      document.getElementById('mevCount').textContent = data.totalMEVRisksDetected;
-      document.getElementById('alertCount').textContent = data.totalAlertsSent;
+      if (data.success) {
+        // Auto-login after registration
+        document.getElementById('registerBox').style.display = 'none';
+        document.getElementById('loginBox').style.display = '';
+        document.getElementById('loginUsername').value = username;
+        document.getElementById('loginPassword').value = password;
+        document.getElementById('registerError').textContent = '';
+        login();
+      } else {
+        document.getElementById('registerError').textContent = data.error || 'Registration failed';
+      }
+    }
+    function showRegister() {
+      document.getElementById('loginBox').style.display = 'none';
+      document.getElementById('registerBox').style.display = '';
+      document.getElementById('registerError').textContent = '';
+    }
+    async function login() {
+      const username = document.getElementById('loginUsername').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const res = await fetch('http://localhost:8090/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+      if (data.success && data.token) {
+        localStorage.setItem('jwt', data.token);
+        localStorage.setItem('userId', data.userId);
+        window.currentUserId = data.userId;
+        document.getElementById('loginBox').style.display = 'none';
+        document.getElementById('userBox').style.display = '';
+        document.getElementById('walletBox').style.display = '';
+        document.getElementById('currentUser').textContent = `User: ${username}`;
+        fetchMetrics();
+        fetchWallets();
+      } else {
+        document.getElementById('loginError').textContent = data.error || 'Login failed';
+      }
+    }
+    function logout() {
+      localStorage.removeItem('jwt');
+      localStorage.removeItem('userId');
+      window.currentUserId = '';
+      document.getElementById('loginBox').style.display = '';
+      document.getElementById('registerBox').style.display = 'none';
+      document.getElementById('userBox').style.display = 'none';
+      document.getElementById('walletBox').style.display = 'none';
+      document.getElementById('currentUser').textContent = '';
+      fetchMetrics();
+    }
+    async function fetchMetrics() {
+      const jwt = localStorage.getItem('jwt');
+      const userId = localStorage.getItem('userId') || '';
+      window.currentUserId = userId;
+      let metricsRes, alertsRes;
+      if (userId && jwt) {
+        metricsRes = await fetch('http://localhost:8090/api/metrics?userId=' + encodeURIComponent(userId), {
+          headers: { 'Authorization': 'Bearer ' + jwt }
+        });
+        alertsRes = await fetch('http://localhost:8090/api/alerts?userId=' + encodeURIComponent(userId), {
+          headers: { 'Authorization': 'Bearer ' + jwt }
+        });
+      } else {
+        metricsRes = await fetch('http://localhost:8090/api/metrics');
+        alertsRes = await fetch('http://localhost:8090/api/alerts');
+      }
+      const data = await metricsRes.json();
+      document.getElementById('txCount').textContent = data.totalTransactionsAnalyzed || 0;
+      document.getElementById('mevCount').textContent = data.totalMEVRisksDetected || 0;
+      document.getElementById('alertCount').textContent = data.totalAlertsSent || 0;
+      document.getElementById('sandwichCount').textContent = data.sandwichAttacksDetected || 0;
+      document.getElementById('frontrunCount').textContent = data.frontrunAttacksDetected || 0;
+      document.getElementById('backrunCount').textContent = data.backrunAttacksDetected || 0;
+      const alertsData = await alertsRes.json();
       const alertList = document.getElementById('alertList');
       alertList.innerHTML = '';
-      (data.recentAlerts || []).forEach(msg => {
+      (alertsData.recentAlerts || []).forEach(msg => {
         const li = document.createElement('li');
         li.textContent = msg;
         alertList.appendChild(li);
       });
     }
-    fetchMetrics();
+    async function fetchWallets() {
+      const jwt = localStorage.getItem('jwt');
+      if (!jwt) return;
+      const res = await fetch('http://localhost:8090/api/wallets', {
+        headers: { 'Authorization': 'Bearer ' + jwt }
+      });
+      const data = await res.json();
+      const walletList = document.getElementById('walletList');
+      walletList.innerHTML = '';
+      if (data.wallets && data.wallets.length) {
+        data.wallets.forEach(addr => {
+          const li = document.createElement('li');
+          li.textContent = addr;
+          walletList.appendChild(li);
+        });
+      } else {
+        const li = document.createElement('li');
+        li.textContent = '(No wallets added)';
+        walletList.appendChild(li);
+      }
+    }
+    async function connectWallet() {
+      if (window.ethereum) {
+        try {
+          const provider = new ethers.providers.Web3Provider(window.ethereum);
+          await provider.send("eth_requestAccounts", []);
+          const signer = provider.getSigner();
+          const address = await signer.getAddress();
+          connectedWalletAddress = address;
+          document.getElementById('connectedWallet').textContent = `Connected: ${address}`;
+          document.getElementById('addWalletInput').value = address;
+          document.getElementById('walletError').textContent = '';
+        } catch (err) {
+          document.getElementById('walletError').textContent = 'MetaMask connection failed';
+        }
+      } else {
+        document.getElementById('walletError').textContent = 'MetaMask not found';
+      }
+    }
+    async function addWallet() {
+      const jwt = localStorage.getItem('jwt');
+      const wallet = document.getElementById('addWalletInput').value.trim();
+      if (!wallet) {
+        document.getElementById('walletError').textContent = 'Enter a wallet address';
+        return;
+      }
+      if (!isValidEthAddress(wallet)) {
+        document.getElementById('walletError').textContent = 'Invalid Ethereum address';
+        return;
+      }
+      // Ownership verification
+      if (window.ethereum && connectedWalletAddress && wallet.toLowerCase() === connectedWalletAddress.toLowerCase()) {
+        try {
+          const provider = new ethers.providers.Web3Provider(window.ethereum);
+          const signer = provider.getSigner();
+          const message = 'Verify ownership for MEV Protection Suite';
+          const signature = await signer.signMessage(message);
+          // Send address, signature, and message to backend
+          const res = await fetch('http://localhost:8090/api/wallets', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt },
+            body: JSON.stringify({ wallet, signature, message })
+          });
+          const data = await res.json();
+          if (data.success) {
+            document.getElementById('addWalletInput').value = '';
+            document.getElementById('walletError').textContent = '';
+            fetchWallets();
+          } else {
+            document.getElementById('walletError').textContent = data.error || 'Failed to add wallet';
+          }
+        } catch (err) {
+          document.getElementById('walletError').textContent = 'Signature failed or rejected';
+        }
+      } else {
+        document.getElementById('walletError').textContent = 'Connect MetaMask and use the connected address';
+      }
+    }
+    function isValidEthAddress(addr) {
+      return /^0x[a-fA-F0-9]{40}$/.test(addr);
+    }
+    // On load, show login or user box
+    window.onload = function() {
+      const jwt = localStorage.getItem('jwt');
+      const userId = localStorage.getItem('userId');
+      if (jwt && userId) {
+        document.getElementById('loginBox').style.display = 'none';
+        document.getElementById('registerBox').style.display = 'none';
+        document.getElementById('userBox').style.display = '';
+        document.getElementById('walletBox').style.display = '';
+        document.getElementById('currentUser').textContent = `User: ${userId}`;
+        window.currentUserId = userId;
+        fetchWallets();
+      } else {
+        document.getElementById('loginBox').style.display = '';
+        document.getElementById('registerBox').style.display = 'none';
+        document.getElementById('userBox').style.display = 'none';
+        document.getElementById('walletBox').style.display = 'none';
+        window.currentUserId = '';
+      }
+      fetchMetrics();
+    };
     setInterval(fetchMetrics, 3000);
   </script>
 </body>

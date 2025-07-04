@@ -1,0 +1,11 @@
+[
+  {
+    "id": "e06dc6da-abf2-49e7-95e6-9fb42e76bf8c",
+    "username": "user1",
+    "passwordHash": "$2b$10$oXKQRGQh5bGajDT.aFFdgOuPNFZgRopyfUznD909EWI7q.Yjl5IqO",
+    "wallets": [
+      "0xa1BB3d0e6D742a09fDb4cAcb51E76F91891eaD5F"
+    ],
+    "notificationPrefs": {}
+  }
+]

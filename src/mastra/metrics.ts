@@ -14,6 +14,10 @@ const metrics = {
   totalMEVRisksDetected: 0,
   totalAlertsSent: 0,
   recentAlerts: [] as string[],
+  sandwichAttacksDetected: 0,
+  frontrunAttacksDetected: 0,
+  backrunAttacksDetected: 0,
+  userMetrics: {} as Record<string, any>, // userId -> metrics
 };
 
 async function saveMetrics() {
@@ -40,23 +44,38 @@ async function loadMetrics() {
 // Immediately load metrics on module import
 loadMetrics();
 
-export async function incrementTransactionsAnalyzed() {
-  metrics.totalTransactionsAnalyzed++;
+function getOrCreateUserMetrics(userId: string) {
+  if (!metrics.userMetrics[userId]) {
+    metrics.userMetrics[userId] = {
+      totalTransactionsAnalyzed: 0,
+      totalMEVRisksDetected: 0,
+      totalAlertsSent: 0,
+      recentAlerts: [] as string[],
+      sandwichAttacksDetected: 0,
+      frontrunAttacksDetected: 0,
+      backrunAttacksDetected: 0,
+    };
+  }
+  return metrics.userMetrics[userId];
+}
+
+export async function incrementUserMetric(userId: string, metric: string, message?: string) {
+  const user = getOrCreateUserMetrics(userId);
+  if (metric.endsWith("AttacksDetected")) {
+    user[metric] = (user[metric] || 0) + 1;
+  } else if (metric === "totalTransactionsAnalyzed" || metric === "totalMEVRisksDetected" || metric === "totalAlertsSent") {
+    user[metric] = (user[metric] || 0) + 1;
+  }
+  if (metric === "totalAlertsSent" && message) {
+    user.recentAlerts.unshift(message);
+    if (user.recentAlerts.length > 10) user.recentAlerts.pop();
+  }
   await saveMetrics();
 }
 
-export async function incrementMEVRisksDetected() {
-  metrics.totalMEVRisksDetected++;
-  await saveMetrics();
-}
-
-export async function incrementAlertsSent(message: string) {
-  metrics.totalAlertsSent++;
-  metrics.recentAlerts.unshift(message);
-  if (metrics.recentAlerts.length > 10) metrics.recentAlerts.pop();
-  await saveMetrics();
-}
-
-export function getMetrics() {
+export function getMetrics(userId?: string) {
+  if (userId) {
+    return metrics.userMetrics[userId] || getOrCreateUserMetrics(userId);
+  }
   return { ...metrics };
 } 

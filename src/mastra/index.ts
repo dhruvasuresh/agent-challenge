@@ -8,6 +8,8 @@ import { protectionAgent } from "./agents/protection-agent/protection-agent";
 import { notificationAgent } from "./agents/notification-agent/notification-agent";
 import express, { Request, Response } from "express";
 import { getMetrics } from "./metrics";
+import userApi from "./user-api";
+import cors from "cors";
 
 export const mastra = new Mastra({
 	workflows: { weatherWorkflow }, // can be deleted later
@@ -24,9 +26,20 @@ export const mastra = new Mastra({
 
 // Add metrics API endpoint
 const app = express();
+app.use(cors()); // Enable CORS for all origins
+app.use(express.json());
+app.use("/api", userApi);
 app.get("/api/metrics", (req: Request, res: Response) => {
-	res.json(getMetrics());
+	const userId = req.query.userId as string | undefined;
+	res.json(getMetrics(userId));
 });
+
+app.get("/api/alerts", (req: Request, res: Response) => {
+	const userId = req.query.userId as string | undefined;
+	const metrics = getMetrics(userId);
+	res.json({ recentAlerts: metrics.recentAlerts || [] });
+});
+
 app.listen(8090, () => {
 	console.log("Metrics API available at http://localhost:8090/api/metrics");
 });

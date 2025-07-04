@@ -28,15 +28,21 @@
     "@mastra/loggers": "^0.10.2",
     "@mastra/memory": "^0.10.3",
     "@types/express": "^5.0.3",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
     "dotenv": "^16.5.0",
-    "ethers": "6.14.4",
+    "ethers": "5.8.0",
     "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
     "ollama-ai-provider": "^1.2.0",
+    "uuid": "^11.1.0",
     "zod": "^3.25.67"
   },
   "devDependencies": {
     "@biomejs/biome": "2.0.4",
     "@nosana/cli": "^1.0.52",
+    "@types/cors": "^2.8.19",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.0.3",
     "mastra": "^0.10.5",
     "typescript": "^5.8.3"
